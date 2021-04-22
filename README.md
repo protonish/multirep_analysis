@@ -5,6 +5,6 @@ pip instal sentencepiece
 ```
 
 # Notes
-Embeddings are of shape (vocab, dim=512)
+Embeddings are of shape `(vocab, dim=512)`
 
 
