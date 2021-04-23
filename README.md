@@ -21,7 +21,12 @@ Step 2: faker.generate() generates data. Set a prefix (TRAINPREF). this will gen
 
 To run just provide the keylist. 
 ```
+# generates ROT-key fake language  
 python faker.py --key 0 --keylist [1,2,3,4,5] --gen --notrgtoken
+
+# generates ROT-key fake language with case preserved 
+python faker.py --key 0 --keylist [1,2,3,4,5] --gen --notrgtoken --keepcase
+
 ```
 
 # SemEval Task 2 Evaluation

@@ -28,6 +28,7 @@ class FakeLang:
         inrange: bool,
         trgtoken: bool = False,
         srctoken: bool = False,
+        keep_case: bool = False,
     ):
 
         self.pref = PREF
@@ -49,7 +50,17 @@ class FakeLang:
         #     print("Finished writing file for lang {}".format("de"))
 
         # A list containing all characters from text
-        char_vocab = self.get_char_vocab(ode, alphaonly=True)
+        if keep_case:
+            print("Case will be preserved in the generated files.")
+            char_vocab = {}
+            char_vocab["lower"] = self.get_char_vocab(
+                ode, alphaonly=True, loweronly=True
+            )
+            char_vocab["upper"] = self.get_char_vocab(
+                ode, alphaonly=True, upperonly=True
+            )
+        else:
+            char_vocab = self.get_char_vocab(ode, alphaonly=True)
         # shifted_vocab = self.shift_vocab(char_vocab, KEY)
 
         if KEY > 2 and RANGE and len(keylist) == 0:
@@ -58,7 +69,12 @@ class FakeLang:
             print("Generating files for langs in range (1-{})".format(KEY))
             for key in range(1, KEY):
                 # cipher_text = []
-                shifted_vocab = self.shift_vocab(char_vocab, key)
+                if keep_case and isinstance(char_vocab, dict):
+                    shifted_vocab = {}
+                    shifted_vocab["lower"] = self.shift_vocab(char_vocab["lower"], key)
+                    shifted_vocab["upper"] = self.shift_vocab(char_vocab["upper"], key)
+                else:
+                    shifted_vocab = self.shift_vocab(char_vocab, key)
                 with open(
                     self.destdir
                     + PREF
@@ -68,7 +84,19 @@ class FakeLang:
                     "w",
                 ) as f:
                     for line in ode:
-                        cline = self.monophonic(line, char_vocab, shifted_vocab)
+                        if keep_case:
+                            assert isinstance(
+                                shifted_vocab, dict
+                            ), "When keeping case, vocab should be dictionary of lower and upper case"
+
+                            cline = self.monophonic(
+                                line, char_vocab["lower"], shifted_vocab["lower"]
+                            )
+                            cline = self.monophonic(
+                                cline, char_vocab["upper"], shifted_vocab["upper"]
+                            )
+                        else:
+                            cline = self.monophonic(line, char_vocab, shifted_vocab)
                         # cipher_text.append(cline)
                         if srctoken:
                             f.write("<{}> {}".format(self.fake_langs[key - 1], cline))
@@ -92,7 +120,13 @@ class FakeLang:
                 )
             )
             for i, key in enumerate(keylist):
-                shifted_vocab = self.shift_vocab(char_vocab, key)
+                if keep_case and isinstance(char_vocab, dict):
+                    shifted_vocab = {}
+                    shifted_vocab["lower"] = self.shift_vocab(char_vocab["lower"], key)
+                    shifted_vocab["upper"] = self.shift_vocab(char_vocab["upper"], key)
+                else:
+                    shifted_vocab = self.shift_vocab(char_vocab, key)
+                # shifted_vocab = self.shift_vocab(char_vocab, key)
                 with open(
                     self.destdir
                     + PREF
@@ -102,7 +136,20 @@ class FakeLang:
                     "w",
                 ) as f:
                     for line in ode:
-                        cline = self.monophonic(line, char_vocab, shifted_vocab)
+                        if keep_case:
+                            assert isinstance(
+                                shifted_vocab, dict
+                            ), "When keeping case, vocab should be dictionary of lower and upper case"
+
+                            cline = self.monophonic(
+                                line, char_vocab["lower"], shifted_vocab["lower"]
+                            )
+                            cline = self.monophonic(
+                                cline, char_vocab["upper"], shifted_vocab["upper"]
+                            )
+                        else:
+                            cline = self.monophonic(line, char_vocab, shifted_vocab)
+                        # cline = self.monophonic(line, char_vocab, shifted_vocab)
                         # cipher_text.append(cline)
                         if srctoken:
                             f.write("<{}> {}".format(self.fake_langs[i], cline))
@@ -143,11 +190,16 @@ class FakeLang:
         # print(cipher_text[4:6])
         print("Done! Check the dir: {}".format(DESTDIR))
 
-    def get_char_vocab(self, text, alphaonly=False):
+    def get_char_vocab(self, text, alphaonly=False, loweronly=False, upperonly=False):
         char_counter = Counter()
         for line in text:
             if alphaonly:
-                char_counter.update(c for c in line if c.isalpha())
+                if loweronly:
+                    char_counter.update(c for c in line if c.isalpha() and c.islower())
+                elif upperonly:
+                    char_counter.update(c for c in line if c.isalpha() and c.isupper())
+                else:
+                    char_counter.update(c for c in line if c.isalpha())
             else:
                 char_counter.update(c for c in line)
 
@@ -358,3 +410,10 @@ if __name__ == "__main__":
     # usage
 
     # python faker.py --key 3 --series/noseries --gen/nogen --prepend/noprepend --trgtoken/notrgtoken --split [train/valid/test]
+
+    # ROT-5 with and without case preservation:
+    # ```
+    # ORIG>> Al Gore: Die Abwendung der Klimakatastrophe
+    # PREV>> Fq Ltwj: Inj FgÄjsizsl ijw Pqnrfpfyfxywtumj
+    # CASE>> Fq Ltwj: Inj Fgàjsizsl ijw Pqnrfpfyfxywtumj
+    # ```
