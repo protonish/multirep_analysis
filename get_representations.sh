@@ -2,9 +2,13 @@
 ROOT=/cs/natlang-expts/transitive_nmt #/local-scratch/nishant/fair/fairmod2
 
 # paths to src_dictionary, checkpoint, and sentencepiece.model
-DICTPATH=$ROOT/data-bin/faker/4/bpe/
+DICTPATH=$ROOT/data-bin/faker/4/bpe/  # point to bpe folder
 CKPTPATH=$ROOT/checkpoints/multi_fake_4
-BPEMODEL=$ROOT/data-bin/faker/4/bpe/sentencepiece.bpe.model
+BPEMODEL=$ROOT/data-bin/faker/4/bpe/sentencepiece.bpe.model  # should match $DICTPATH/sentencepiece.bpe.model
+
+# input and output directories for custom files
+INPUT=""
+OUTPUT=""
 
 # also accepts the args --input_dir and --output_dir
 python encoder_outs.py --dict $DICTPATH --checkpoint $CKPTPATH --spm $BPEMODEL
