@@ -26,7 +26,7 @@ def bag_of_subwords( subwords, embeddings ):
     bos = torch.zeros( (1,n_dim) )
     for subword_id in subwords:
         bos = bos + embeddings[subword_id]
-    return bos
+    return bos / len(subwords)
 
 if __name__ == "__main__":
     for filename in os.listdir( args.input_dir ):
@@ -36,8 +36,8 @@ if __name__ == "__main__":
 
                     # read word-pair
                     word1, word2 = line.split("\t")
-                    word1 = map(int, word1.strip().split(" "))
-                    word2 = map(int, word2.strip().split(" "))
+                    word1 = list(map(int, word1.strip().split(" ")))
+                    word2 = list(map(int, word2.strip().split(" ")))
             
                     # compute bag-of-subwords embedding for word-pair
                     emb1 = bag_of_subwords( word1, bpe_embeddings )
