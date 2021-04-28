@@ -28,7 +28,7 @@ python faker.py --key 0 --keylist [1,2,3,4,5] --gen --notrgtoken
 python faker.py --key 0 --keylist [1,2,3,4,5] --gen --notrgtoken --keepcase
 
 ```
-# Compute overlap within a ROT-key data configuration (series/spaced/cased)
+### Compute overlap within a ROT-key data configuration (series/spaced/cased)
 
 ```
 python overlap.py --langs de a b c d e
